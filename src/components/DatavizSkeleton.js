@@ -34,8 +34,9 @@ export default defineComponent({
   },
   computed: {
     viewBox() { return `0 0 ${this.width} ${this.height}`},
-    dataMinValue() { return this.data.length ? d3.min(this.data) : undefined; },
-    dataMaxValue() { return this.data.length ? d3.max(this.data) : undefined; },
+    // Examples of computed values you don't want to calculate on your actual D3.js script
+    dataMinValue() { return this.data.length ? d3.min(this.data) : 0; },
+    dataMaxValue() { return this.data.length ? d3.max(this.data) : 0; },
     rangeValue() {
       return d3.scaleSequential()
         .domain(this.dataMinValue, this.dataMaxValue)
@@ -84,7 +85,7 @@ export default defineComponent({
     /**
      * Fetch data needed to build your dataviz.
      *
-     * Here call your external API to get your data.
+     * Here, call your external API to get your data.
      *
      * @returns
      */
