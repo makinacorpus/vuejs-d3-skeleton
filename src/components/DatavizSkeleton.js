@@ -47,7 +47,6 @@ export default defineComponent({
   },
   mounted() {
     this.initInputOptions();
-    this.initDataviz()
     this.refresh();
   },
   methods: {
@@ -109,15 +108,6 @@ export default defineComponent({
       .finally(() => {
         this.loading = false;
       })
-    },
-    /**
-     * Initialize the dataviz.
-     *
-     * Initialize here your dataviz with all
-     * the parts that won't move with data.
-     */
-    initDataviz() {
-      // For example, build your axes here
     },
     /**
      * Refresh the data dependent part of the dataviz.

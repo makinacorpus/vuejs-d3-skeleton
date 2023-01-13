@@ -92,7 +92,6 @@ export default defineComponent({
   },
   mounted() {
     this.initInputOptions();
-    this.initDataviz()
     this.refresh();
   },
   methods: {
@@ -196,9 +195,6 @@ export default defineComponent({
         map.getCanvas().style.cursor = '';
         popup.remove();
       });
-    },
-    initDataviz() {
-      // Rien à faire ici, tout est initialisé dans le template
     },
     refreshDataviz() {
       // Rien à faire ici, tout est géré avec les propriétés
