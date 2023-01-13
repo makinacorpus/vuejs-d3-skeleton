@@ -21,7 +21,7 @@ export default defineComponent({
       svgElementId: 'dataviz-' + Math.random().toString(36).substring(2),
       padding: 40,
       daySize: 18,
-      dayShortLabel: ["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."],
+      dayShortLabel: ["Lun.","Mar.","Mer.","Jeu.","Ven.","Sam.", "Dim."],
       hoursLabel: Array.from({ length: 25}, (v, i) => ('00' + i).slice(-2) + 'h'),
       legendText: '&nbsp;',
     }
@@ -212,7 +212,7 @@ export default defineComponent({
       return (this.heatmapData[day] ?? [])[hour] ?? undefined;
     },
     updateLegend(day, hour) {
-      const dayFormatted = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"][day];
+      const dayFormatted = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][day];
 
       this.legendText = `Le ${dayFormatted}, entre ${this.hoursLabel[hour]} et ${this.hoursLabel[hour + 1]}, il passe en moyenne ${this.heatmapValue(day, hour).toFixed(2)} cyclistes`
     },
