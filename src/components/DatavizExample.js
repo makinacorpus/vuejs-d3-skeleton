@@ -7,7 +7,7 @@ export default defineComponent({
   data() {
     return {
       // input
-      borne: undefined,
+      borne: 682,
       borneOptionList: [],
 
       // loading and error handling
@@ -21,7 +21,9 @@ export default defineComponent({
       svgElementId: 'dataviz-' + Math.random().toString(36).substring(2),
       padding: 40,
       daySize: 18,
-      gDataElement: undefined,
+      dayShortLabel: ["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."],
+      hoursLabel: Array.from({ length: 25}, (v, i) => ('00' + i).slice(-2) + 'h'),
+      legendText: '&nbsp;',
     }
   },
   computed: {
@@ -47,7 +49,10 @@ export default defineComponent({
         return [];
       }
 
-      const groupByJourSemaine = d3.groups(this.data, record => record.fields.jour_de_la_semaine);
+      const groupByJourSemaine = d3.sort(
+        d3.groups(this.data, record => record.fields.jour_de_la_semaine),
+        ([i,]) => i
+      );
 
       return d3.map(groupByJourSemaine, ([, data]) => {
         const ret = [];
@@ -58,24 +63,32 @@ export default defineComponent({
         return ret;
       });
     },
-    minHeatmap() {
-      if (this.heatmapData.length == 0) {
-        return null;
-      }
-
-      return d3.min(this.heatmapData, d => d3.min(d));
-    },
-    maxHeatmap() {
-      if (this.heatmapData.length == 0) {
-        return null;
-      }
-
-      return d3.max(this.heatmapData, d => d3.max(d));
-    },
     rangeColorHeatMap() {
-      return d3.scaleSequential().domain([this.minHeatmap, this.maxHeatmap])
-        .interpolator(d3.interpolatePuRd);
-    }
+      // C'est finalement presque le seul endroit où l'on
+      // a besoin de d3 !
+      return d3.scaleSequential()
+        .domain([0, 100])
+        .interpolator(d3.interpolatePuRd)
+      ;
+    },
+    rectFillValues() {
+      const ret = [];
+
+      for (const day in this.dayShortLabel) {
+        ret[day] = [];
+
+        for(const hour in this.hoursLabel) {
+          const value = this.heatmapValue(day, hour);
+          if (!value) {
+            ret[day][hour] = '#eaebec';
+          } else {
+            ret[day][hour] = this.rangeColorHeatMap(value);
+          }
+        }
+      }
+
+      return ret;
+    },
   },
   mounted() {
     this.initInputOptions();
@@ -185,96 +198,27 @@ export default defineComponent({
       });
     },
     initDataviz() {
-      this.appendDayLabel();
-      this.appendHourLabel();
-      this.appendNoDataRect();
-    },
-    appendDayLabel() {
-      d3.select(`#${this.svgElementId} .days-label`)
-        .selectAll('text')
-        .remove()
-        .data(d3.range(7))
-        .join('text')
-        .text(d => this.shortWeekDayFormat(d))
-          .attr('class', 'label')
-          .attr('transform', (d, i) => {
-            return 'translate(' + (this.padding - 4) + ',' + (i * this.daySize + this.padding) + ')'
-          })
-          .style('text-anchor', 'end')
-    },
-    appendHourLabel() {
-      d3.select(`#${this.svgElementId} .hours-label`)
-        .selectAll('text')
-        .remove()
-        .data(d3.range(24))
-        .join('text')
-        .text((d, i) => i % 3 === 0 ? this.hourFormat(d) : null)
-          .attr('class', 'label')
-          .style('text-anchor', 'left')
-          .attr('transform', (d, i) => {
-              return 'rotate(-90)translate(-' + (this.padding - 15) + ',' + (i * this.daySize + this.padding + 20) + ')'
-          })
-    },
-    appendNoDataRect() {
-      d3.select(`#${this.svgElementId} .no-data`)
-        .selectAll('rect')
-        .remove()
-        .data(d3.utcHours(new Date('2021-12-27 00:00'), new Date('2022-01-02 24:00')))
-        .join('rect')
-          .attr("x", d => d.getUTCHours() * this.daySize + 0.5 * this.daySize + this.padding)
-          .attr("y", d => (d.getUTCDay() - 1) * this.daySize + 0.5 * this.daySize + this.padding)
-          .attr('rx', this.daySize)
-          .attr('width', this.daySize * 0.9)
-          .attr('height', this.daySize * 0.9)
-      ;
+      // Rien à faire ici, tout est initialisé dans le template
     },
     refreshDataviz() {
-      d3.select(`#${this.svgElementId} .data`)
-        .selectAll('rect')
-        .remove()
-
-      d3.select(`#${this.svgElementId} .data`)
-        .selectAll('rect')
-        .data(d3.utcHours(new Date('2021-12-27 00:00'), new Date('2022-01-02 24:00')))
-        .join('rect')
-          .attr("x", d => d.getUTCHours() * this.daySize + 0.5 * this.daySize + this.padding)
-          .attr("y", d => (d.getUTCDay() - 1) * this.daySize + 0.5 * this.daySize + this.padding)
-          .attr('rx', this.daySize)
-          .attr('width', this.daySize * 0.9)
-          .attr('height', this.daySize * 0.9)
-          .attr('title', d => {
-            return this.heatmapValue(d);
-          })
-          .style('fill', d => {
-            let value = this.heatmapValue(d);
-            if (!value) {
-              return 'transparent';
-            }
-
-            return this.rangeColorHeatMap(value);
-          })
-          .on("mouseover", (e, d) => {
-            d3.select(`#${this.svgElementId}-tootlip`)
-              .style("opacity", 1)
-              .html(`Le ${this.longWeekDayFormat(d.getUTCDay())}, entre ${this.hourFormat(d.getUTCHours())} et ${this.hourFormat(d.getUTCHours() + 1)}, il passe en moyenne ${this.heatmapValue(d).toFixed(2)} cyclistes`)
-              .style("left", d.getUTCHours() * this.daySize + 0.5 * this.daySize + this.padding)
-              .style("top", (d.getUTCDay() - 1) * this.daySize + 0.5 * this.daySize + this.padding)
-            ;
-          })
-          .on("mouseleave", d => {
-            d3.select(`#${this.svgElementId}-tootlip`).style("opacity", 0);
-          })
+      // Rien à faire ici, tout est géré avec les propriétés
+      // computed et la réactivité de Vue.js
     },
-    heatmapValue(date) {
+    heatmapValue(day, hour) {
       if (this.heatmapData.length == 0) {
         null;
       }
 
-      return (this.heatmapData[date.getUTCDay()] ?? [])[date.getUTCHours()] ?? undefined;
+      return (this.heatmapData[day] ?? [])[hour] ?? undefined;
     },
-    shortWeekDayFormat(i) { return ["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][(i + 1)%7]; },
-    longWeekDayFormat(i) { return ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"][(i + 1)%7]; },
-    hourFormat(i) { return ('00' + i % 24).slice(-2) + 'h'; },
+    updateLegend(day, hour) {
+      const dayFormatted = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"][day];
+
+      this.legendText = `Le ${dayFormatted}, entre ${this.hoursLabel[hour]} et ${this.hoursLabel[hour + 1]}, il passe en moyenne ${this.heatmapValue(day, hour).toFixed(2)} cyclistes`
+    },
+    resetLegend() {
+      this.legendText = '&nbsp;';
+    },
   },
 
 });

@@ -1,5 +1,5 @@
 <template>
-  <div class="dataviz-shell">
+  <div class="my-dataviz-shell">
     <form class="form">
       <div>
         <label for="borne">Borne&nbsp;: </label>
@@ -24,67 +24,81 @@
       :id="svgElementId"
       :viewBox="viewBox"
     >
-      <g class="hours-label"></g>
-      <g class="days-label"></g>
-      <g class="no-data"></g>
-      <g class="data"></g>
+      <g class="days-label">
+        <text
+          v-for="(dayLabel, day) of dayShortLabel"
+          :key="day"
+          class="label"
+          text-anchor="end"
+          :transform="'translate(' + (padding + 4) + ',' + ((day * daySize) + padding) + ')'"
+        >{{ dayLabel }}</text>
+      </g>
+      <g class="hours-label">
+        <template v-for="(hourLabel, hour) of hoursLabel" :key="hour">
+          <text
+            v-if="hour % 3 == 0 && hour < 24"
+            class="label"
+            text-anchor="end"
+            :transform="'rotate(-90)translate(-6,' + (hour * daySize + padding + 20) + ')'"
+          >{{ hourLabel }}</text>
+        </template>
+      </g>
+      <g class="data">
+        <template v-for="(dayLabel, day) in dayShortLabel" :key="day">
+          <template v-for="(hourLabel, hour) of hoursLabel" :key="hour">
+            <rect
+              v-if="hour < 24"
+              :x="hour * daySize + 0.5 * daySize + padding"
+              :y="(day - 1) * daySize + 0.5 * daySize + padding"
+              :rx="daySize"
+              :width="daySize * 0.9"
+              :height="daySize * 0.9"
+              :fill="rectFillValues[day][hour]"
+              @mouseover="updateLegend(day, hour)"
+              @mouseleave="resetLegend"
+            >
+            </rect>
+          </template>
+        </template>
+      </g>
     </svg>
-    <div :id="svgElementId + '-tootlip'"></div>
+    <p v-html="legendText"></p>
 
-    <ul v-show="data.length != 0">
-      <li>Basées sur <a href="https://data.nantesmetropole.fr/explore/dataset/244400404_comptages-velo-nantes-metropole/information">des données issue de l'open data de Nantes Métropole</a></li>
-      <li>Données disponibles du {{ minDate }} au {{ maxDate }}</li>
-    </ul>
+    <p v-show="data.length != 0">
+      Basé sur des donnéesdu {{ minDate }} au {{ maxDate }}
+      issues <a href="https://data.nantesmetropole.fr/explore/dataset/244400404_comptages-velo-nantes-metropole/information">
+      de l'open data de Nantes Métropole</a>
+    </p>
   </div>
 </template>
 
-<style>
+<style lang="scss">
   @import "maplibre-gl";
 
-  .dataviz-shell {
+  .my-dataviz-shell {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 1rem
-  }
-  form > * {
-    padding: 10px;
-  }
-  text.label, #dataviz-tootlip {
-    fill: #555555;
-    font-family: 'sans-serif';
-    font-size: 10px;
-  }
-  .no-data > rect {
-    fill: #eaebec;
-  }
-  #div-tooltip {
-    opacity: 0;
-    background-color: white;
-    border: "solid";
-    border-width: 2px;
-    padding: 5px;
-  }
-  .option-map {
-    width: 450px;
-    height: 250px;
-  }
-  /* .marker {
-    width: 10px;
-    height: 10px;
-    background: #A9074866;
-    border: solid 2px #ffffffaa;
-    border-radius: 100%;
-  } */
-  .marker:hover {
-    cursor: pointer;
+    form {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 1rem
+    }
+    form > * {
+      padding: 10px;
+    }
+    text.label, p {
+      fill: #555555;
+      font-family: 'sans-serif';
+      font-size: 10px;
+    }
+    .option-map {
+      width: 450px;
+      height: 250px;
+    }
   }
 </style>
 

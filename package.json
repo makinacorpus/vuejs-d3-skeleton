@@ -11,6 +11,7 @@
   "dependencies": {
     "d3": "^7.8.0",
     "maplibre-gl": "^2.4.0",
+    "sass": "^1.57.1",
     "vue": "^3.2.45"
   },
   "devDependencies": {
