@@ -34,6 +34,8 @@
       :id="svgElementId"
       :viewBox="viewBox"
     >
+      <!-- If you already know some part of your SVG and
+      if it don't need some complexe calculations, just write it directly ! -->
       <g class="axe-x"></g>
       <g class="axe-y"></g>
       <g class="data"></g>

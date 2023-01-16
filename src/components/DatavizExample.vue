@@ -34,7 +34,7 @@
         >{{ dayLabel }}</text>
       </g>
       <g class="hours-label">
-        <template v-for="(hourLabel, hour) of hoursLabel" :key="hour">
+        <template v-for="(hourLabel, hour) in hoursLabel" :key="hour">
           <text
             v-if="hour % 3 == 0 && hour < 24"
             class="label"
@@ -45,7 +45,7 @@
       </g>
       <g class="data">
         <template v-for="(dayLabel, day) in dayShortLabel" :key="day">
-          <template v-for="(hourLabel, hour) of hoursLabel" :key="hour">
+          <template v-for="(hourLabel, hour) in hoursLabel" :key="hour">
             <rect
               v-if="hour < 24"
               :x="hour * daySize + 0.5 * daySize + padding"
@@ -65,7 +65,7 @@
     <p v-html="legendText"></p>
 
     <p v-show="data.length != 0">
-      Basé sur des donnéesdu {{ minDate }} au {{ maxDate }}
+      Basé sur des données du {{ minDate }} au {{ maxDate }}
       issues <a href="https://data.nantesmetropole.fr/explore/dataset/244400404_comptages-velo-nantes-metropole/information">
       de l'open data de Nantes Métropole</a>
     </p>
