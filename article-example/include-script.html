@@ -1,0 +1,21 @@
+// script to put article to include this example
+
+<script>
+  fetch('https://main--vuejs-d3-skeleton-makina.netlify.app/manifest.json')
+  .then(response => response.json())
+  .then(response => {
+    const head = document.getElementsByTagName('head')[0];
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://main--vuejs-d3-skeleton-makina.netlify.app/' + response['index.html'].file;
+    head.appendChild(script);
+
+    const style = document.createElement('link');
+    style.rel = "stylesheet";
+    style.type = 'text/css';
+    style.href = 'https://main--vuejs-d3-skeleton-makina.netlify.app/' + response['index.css'].file;
+    head.appendChild(style);
+  })
+  .catch(e => console.log(e))
+</script>
+<div dataviz-example></div>
