@@ -70,7 +70,6 @@ export default defineComponent({
           .attr("x2", this.width - this.margin - this.margin)
           .attr("stroke", this.gridColor));
 
-
       yAxisElement.select(".domain")
         .style('stroke', this.axeColor);
 
@@ -81,6 +80,16 @@ export default defineComponent({
       d3.select('#ma-dataviz .axis-x')
         .attr("transform", `translate(0,${this.height - this.margin})`)
         .call(xAxis);
+
+      xAxisElement.select(".domain")
+        .style('stroke', this.axeColor);
+
+      xAxisElement.selectAll(".tick text")
+        .style('fill', this.axeColor);
+
+      xAxisElement.selectAll(".tick line")
+        .attr('stroke-width', '0.5px')
+        .attr('stroke', this.gridColor);
     },
   },
 });
